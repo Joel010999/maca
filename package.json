@@ -7,6 +7,6 @@
     "start": "npx prisma db push --accept-data-loss --schema=backend/prisma/schema.prisma && node backend/dist/index.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
