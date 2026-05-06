@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend && npx --prefix backend prisma generate --schema=backend/prisma/schema.prisma && npm run build --prefix backend",
-    "start": "npx prisma db push --accept-data-loss --schema=backend/prisma/schema.prisma && node backend/dist/index.js"
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend && cd backend && npx prisma generate && npm run build",
+    "start": "cd backend && npx prisma db push --accept-data-loss && node dist/index.js"
   },
   "engines": {
     "node": ">=20"
