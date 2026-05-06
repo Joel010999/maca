@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Hammer, PlusCircle, LogOut, 
-  Search, ShoppingBag, Edit3, Eye, X, Phone, Package,
-  Target, Activity, Star, Printer, Mail, CreditCard, MapPin
+  Search, ShoppingBag, Edit3, Eye, X,
+  Target, Activity, Star, Printer
 } from 'lucide-react';
 
 function App() {

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 
@@ -11,6 +12,10 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve frontend static files in production
+const frontendPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendPath));
 
 // --- ROUTES ---
 
@@ -101,6 +106,11 @@ app.patch('/api/items/:id/blacksmith', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error updating blacksmith status' });
   }
+});
+
+// Catch-all: serve frontend for any non-API route (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
