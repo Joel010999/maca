@@ -45,6 +45,9 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [editPayment, setEditPayment] = useState('');
   const [editObs, setEditObs] = useState('');
+  const [editTotal, setEditTotal] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editProduct, setEditProduct] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +293,15 @@ function App() {
                         <td style={{ padding: 20, textAlign: 'right' }}>
                           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                             <button onClick={(e) => { e.stopPropagation(); setViewingOrder(o); }} style={{ padding: 10, borderRadius: 12, background: '#f5f5f5', border: 'none', cursor: 'pointer' }}><Eye size={16}/></button>
-                            <button onClick={(e) => { e.stopPropagation(); setEditingOrder(o); setEditPayment(o.advancePayment); setEditObs(o.observations); }} style={{ padding: 10, borderRadius: 12, background: '#f5f5f5', border: 'none', cursor: 'pointer' }}><Edit3 size={16}/></button>
+                            <button onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setEditingOrder(o); 
+                              setEditPayment(o.advancePayment); 
+                              setEditObs(o.observations); 
+                              setEditTotal(o.totalAmount);
+                              setEditName(o.customerName);
+                              setEditProduct(o.items?.[0]?.productName || '');
+                            }} style={{ padding: 10, borderRadius: 12, background: '#f5f5f5', border: 'none', cursor: 'pointer' }}><Edit3 size={16}/></button>
                             <button onClick={(e) => { e.stopPropagation(); handleDeleteOrder(o.id); }} style={{ padding: 10, borderRadius: 12, background: '#fff1f1', color: '#ff4d4d', border: 'none', cursor: 'pointer' }}><Trash2 size={16}/></button>
                           </div>
                         </td>
@@ -413,16 +424,45 @@ function App() {
         {editingOrder && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
             <div className="glass glass-modal" style={{ padding: 48, borderRadius: 32, width: 420 }}>
-              <h4 style={{ marginBottom: 24, fontSize: 22, fontFamily:'Playfair Display' }}>Actualizar Pago</h4>
+              <h4 style={{ marginBottom: 24, fontSize: 22, fontFamily:'Playfair Display' }}>Editar Venta</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <input type="number" style={inputStyle} value={editPayment} onChange={e => setEditPayment(e.target.value)} placeholder="Monto Pagado" />
-                <textarea style={{ ...inputStyle, height: 80, resize:'none' }} value={editObs} onChange={e => setEditObs(e.target.value)} placeholder="Nuevas observaciones..." />
+                <div>
+                  <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginBottom: 5 }}>CLIENTE</p>
+                  <input type="text" style={inputStyle} value={editName} onChange={e => setEditName(e.target.value)} placeholder="Nombre del Cliente" />
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginBottom: 5 }}>PRODUCTO</p>
+                  <input type="text" style={inputStyle} value={editProduct} onChange={e => setEditProduct(e.target.value)} placeholder="Producto" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginBottom: 5 }}>TOTAL $</p>
+                    <input type="number" style={inputStyle} value={editTotal} onChange={e => setEditTotal(e.target.value)} placeholder="Total" />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginBottom: 5 }}>PAGADO $</p>
+                    <input type="number" style={inputStyle} value={editPayment} onChange={e => setEditPayment(e.target.value)} placeholder="Seña/Pago" />
+                  </div>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginBottom: 5 }}>OBSERVACIONES</p>
+                  <textarea style={{ ...inputStyle, height: 80, resize:'none' }} value={editObs} onChange={e => setEditObs(e.target.value)} placeholder="Nuevas observaciones..." />
+                </div>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <button onClick={() => { 
+                     const total = parseFloat(editTotal) || 0;
                      const paid = parseFloat(editPayment) || 0;
-                     setOrders(prev => prev.map(o => o.id === editingOrder.id ? { ...o, advancePayment: paid, balance: o.totalAmount - paid, observations: editObs } : o));
+                     setOrders(prev => prev.map(o => o.id === editingOrder.id ? { 
+                       ...o, 
+                       customerName: editName,
+                       totalAmount: total, 
+                       advancePayment: paid, 
+                       balance: total - paid, 
+                       observations: editObs,
+                       items: o.items.map((item: any, idx: number) => idx === 0 ? { ...item, productName: editProduct } : item)
+                     } : o));
                      setEditingOrder(null);
-                  }} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Guardar</button>
+                  }} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Guardar Cambios</button>
                   <button onClick={() => setEditingOrder(null)} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#f5f5f5', border: 'none', cursor: 'pointer' }}>Cancelar</button>
                 </div>
               </div>
