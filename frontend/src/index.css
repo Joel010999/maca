@@ -53,3 +53,111 @@ body {
 .premium-shadow {
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.1);
 }
+
+/* Responsive Utilities */
+.main-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.dashboard-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+}
+
+@media (max-width: 1024px) {
+  .main-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-row, .split-view {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .show-mobile {
+    display: block !important;
+  }
+  
+  .glass-modal {
+    width: 95% !important;
+    padding: 24px !important;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+/* New Responsive Classes */
+@media (max-width: 1024px) {
+  .app-container {
+    flex-direction: column !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: 20px !important;
+  }
+  
+  .main-header {
+    flex-direction: column !important;
+    margin-bottom: 24px !important;
+    align-items: flex-start !important;
+  }
+  
+  .page-title {
+    font-size: 28px !important;
+  }
+  
+  .search-bar {
+    width: 100% !important;
+  }
+  
+  .dashboard-card {
+    padding: 20px !important;
+  }
+  
+  .form-grid, .modal-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.health-card {
+  transition: transform 0.3s ease;
+}
+
+@media (hover: hover) {
+  .health-card:hover {
+    transform: translateY(-5px);
+  }
+}

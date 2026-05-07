@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Hammer, PlusCircle, LogOut, 
-  Search, ShoppingBag, Edit3, Eye, X,
+  Search, ShoppingBag, Edit3, Eye, X, Menu,
   Target, Activity, Star, Printer
 } from 'lucide-react';
 
@@ -12,6 +12,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'dashboard' | 'ventas' | 'herreria'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Persistencia LocalStorage - Llave v1 para inicio limpio
   const [orders, setOrders] = useState<any[]>(() => {
@@ -106,46 +107,85 @@ function App() {
     return (
       <div style={{ minHeight: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: '#f8f8f8' }}>
         <div className="animated-bg" />
-        <div className="glass" style={{ maxWidth: 400, width: '100%', padding: 48, borderRadius: 40, zIndex: 10 }}>
+        <div className="glass glass-modal" style={{ maxWidth: 400, width: '100%', padding: 48, borderRadius: 40, zIndex: 10 }}>
           <h1 style={{ textAlign: 'center', marginBottom: 32, fontFamily: 'Playfair Display' }}>Male Style</h1>
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Usuario" style={inputStyle} />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" style={inputStyle} />
-            <button type="submit" style={{ padding: 18, borderRadius: 16, background: '#E6007E', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Entrar</button>
+            <button type="submit" style={{ padding: 18, borderRadius: 16, background: '#E6007E', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}>Entrar</button>
           </form>
         </div>
       </div>
     );
   }
 
+  const SidebarContent = () => (
+    <>
+      <h2 style={{ marginBottom: 48, fontFamily: 'Playfair Display' }}>Male Style</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexGrow: 1 }}>
+        {[{id:'dashboard', icon:LayoutDashboard}, {id:'ventas', icon:ShoppingBag}, {id:'herreria', icon:Hammer}].map(t => (
+          <button 
+            key={t.id} 
+            onClick={() => { setActiveTab(t.id as any); setIsMobileMenuOpen(false); }} 
+            style={{ display:'flex', alignItems:'center', gap:12, padding:15, borderRadius:16, border:'none', background:activeTab === t.id ? '#E6007E' : 'transparent', color:activeTab === t.id ? 'white' : '#777', cursor:'pointer', fontWeight:'bold', textAlign: 'left', width: '100%' }}
+          >
+            <t.icon size={20}/> {t.id}
+          </button>
+        ))}
+      </div>
+      <button onClick={() => setIsLoggedIn(false)} style={{ display:'flex', alignItems:'center', gap:12, padding:15, color:'#ff4d4d', background:'none', border:'none', cursor:'pointer', fontWeight:'bold', marginTop: '40px' }}><LogOut size={20}/> Salir</button>
+    </>
+  );
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', position: 'relative', background: '#f8f8f8' }}>
+    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', position: 'relative', background: '#f8f8f8' }}>
       <div className="animated-bg no-print" />
       
-      {/* Sidebar */}
-      <nav className="glass no-print" style={{ width: 260, margin: 20, borderRadius: 32, padding: 30, display: 'flex', flexDirection: 'column', zIndex: 10 }}>
-        <h2 style={{ marginBottom: 48, fontFamily: 'Playfair Display' }}>Male Style</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexGrow: 1 }}>
-          {[{id:'dashboard', icon:LayoutDashboard}, {id:'ventas', icon:ShoppingBag}, {id:'herreria', icon:Hammer}].map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id as any)} style={{ display:'flex', alignItems:'center', gap:12, padding:15, borderRadius:16, border:'none', background:activeTab === t.id ? '#E6007E' : 'transparent', color:activeTab === t.id ? 'white' : '#777', cursor:'pointer', fontWeight:'bold' }}><t.icon size={20}/> {t.id}</button>
-          ))}
+      {/* Mobile Header */}
+      <header className="glass no-print show-mobile" style={{ display: 'none', padding: '15px 20px', position: 'sticky', top: 0, zIndex: 50, marginBottom: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, fontFamily: 'Playfair Display', fontSize: '20px' }}>Male Style</h2>
+          <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 5 }}><Menu size={24} /></button>
         </div>
-        <button onClick={() => setIsLoggedIn(false)} style={{ display:'flex', alignItems:'center', gap:12, padding:15, color:'#ff4d4d', background:'none', border:'none', cursor:'pointer', fontWeight:'bold', marginTop: 'auto' }}><LogOut size={20}/> Salir</button>
+      </header>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileMenuOpen(false)} className="mobile-menu-overlay" />
+            <motion.nav 
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              className="glass"
+              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 280, zIndex: 101, padding: 30, display: 'flex', flexDirection: 'column' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+                <button onClick={() => setIsMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
+              </div>
+              <SidebarContent />
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+      
+      {/* Desktop Sidebar */}
+      <nav className="glass no-print hide-mobile" style={{ width: 260, margin: 20, borderRadius: 32, padding: 30, display: 'flex', flexDirection: 'column', zIndex: 10, height: 'calc(100vh - 40px)', position: 'sticky', top: 20 }}>
+        <SidebarContent />
       </nav>
 
       {/* Main Content */}
-      <main className="no-print" style={{ flexGrow: 1, padding: 40, zIndex: 10, overflowY: 'auto' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
-          <h3 style={{ fontSize: 36, fontFamily: 'Playfair Display', textTransform: 'capitalize' }}>{activeTab}</h3>
-          <div className="glass" style={{ padding: '12px 24px', borderRadius: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Search size={18} color="#999"/><input type="text" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ border: 'none', background: 'none', outline: 'none', width: 200 }} />
+      <main className="no-print main-content" style={{ flexGrow: 1, zIndex: 10, overflowY: 'auto', width: '100%' }}>
+        <header className="main-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48, gap: 20 }}>
+          <h3 className="page-title" style={{ fontSize: 36, fontFamily: 'Playfair Display', textTransform: 'capitalize', margin: 0 }}>{activeTab}</h3>
+          <div className="glass search-bar" style={{ padding: '10px 20px', borderRadius: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Search size={18} color="#999"/><input type="text" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ border: 'none', background: 'none', outline: 'none', width: '100%' }} />
           </div>
         </header>
 
         <AnimatePresence mode="wait">
           {activeTab === 'dashboard' && (
             <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+              <div className="main-grid">
                 <div className="glass" style={{ padding: 25, borderRadius: 24, cursor: 'pointer' }} onClick={() => setShowHistory(true)}>
                   <p style={{ fontSize: 10, fontWeight: 'bold', color: '#999', marginBottom: 8 }}>FACTURACIÓN TOTAL</p>
                   <p style={{ fontSize: 26, fontWeight: 'bold' }}>${totalBilled.toLocaleString()}</p>
@@ -166,36 +206,36 @@ function App() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 30 }}>
-                <div className="glass" style={{ padding: 32, borderRadius: 28 }}>
+              <div className="dashboard-row">
+                <div className="glass dashboard-card" style={{ padding: 32, borderRadius: 28 }}>
                   <h4 style={{ marginBottom: 28, fontSize: 18, display:'flex', alignItems:'center', gap:10 }}><Activity size={20} color="#E6007E"/> Actividad Reciente</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {orders.slice(0, 5).map(o => (
                       <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                        <div><p style={{ fontSize: 14, fontWeight: 'bold' }}>{o.customerName}</p><p style={{ fontSize: 11, color: '#999' }}>{o.items[0].productName}</p></div>
-                        <div style={{ textAlign: 'right' }}><p style={{ fontSize: 14, fontWeight: 'bold' }}>${o.totalAmount.toLocaleString()}</p><p style={{ fontSize: 10, color: o.balance > 0 ? '#E6007E' : '#10b981', fontWeight:'bold' }}>{o.balance > 0 ? 'Con Deuda' : 'Saldado'}</p></div>
+                        <div><p style={{ fontSize: 14, fontWeight: 'bold', margin: 0 }}>{o.customerName}</p><p style={{ fontSize: 11, color: '#999', margin: 0 }}>{o.items[0].productName}</p></div>
+                        <div style={{ textAlign: 'right' }}><p style={{ fontSize: 14, fontWeight: 'bold', margin: 0 }}>${o.totalAmount.toLocaleString()}</p><p style={{ fontSize: 10, color: o.balance > 0 ? '#E6007E' : '#10b981', fontWeight:'bold', margin: 0 }}>{o.balance > 0 ? 'Con Deuda' : 'Saldado'}</p></div>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="glass" style={{ padding: 32, borderRadius: 28, background: 'linear-gradient(135deg, #E6007E 0%, #FF4DB2 100%)', color: 'white' }}>
+                <div className="glass dashboard-card health-card" style={{ padding: 32, borderRadius: 28, background: 'linear-gradient(135deg, #E6007E 0%, #FF4DB2 100%)', color: 'white' }}>
                   <h4 style={{ marginBottom: 24, fontSize: 18, display:'flex', alignItems:'center', gap:10 }}><Target size={20}/> Salud del Negocio</h4>
-                  <p style={{ fontSize: 12, opacity: 0.8 }}>Cobrado vs. Facturado</p>
+                  <p style={{ fontSize: 12, opacity: 0.8, margin: 0 }}>Cobrado vs. Facturado</p>
                   <p style={{ fontSize: 36, fontWeight: 'bold', margin: '8px 0' }}>{collectionHealth.toFixed(1)}%</p>
                   <div style={{ padding: 18, background: 'rgba(255,255,255,0.2)', borderRadius: 20, marginTop: 24 }}>
-                    <p style={{ fontSize: 12, fontWeight: 'bold' }}>Ganancia Estimada*</p>
-                    <p style={{ fontSize: 24, fontWeight: 'bold' }}>${estimatedProfit.toLocaleString()}</p>
+                    <p style={{ fontSize: 12, fontWeight: 'bold', margin: 0 }}>Ganancia Estimada*</p>
+                    <p style={{ fontSize: 24, fontWeight: 'bold', margin: 0 }}>${estimatedProfit.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="glass" style={{ padding: 32, borderRadius: 28 }}>
+              <div className="glass dashboard-card" style={{ padding: 32, borderRadius: 28 }}>
                 <h4 style={{ marginBottom: 20, fontSize: 16, display:'flex', alignItems:'center', gap:10 }}><Star size={18} color="#f59e0b"/> Ranking de Estructuras</h4>
                 <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 10 }}>
                   {Object.entries(productRanking).map(([name, count]: any) => (
                     <div key={name} style={{ minWidth: 160, padding: 20, borderRadius: 20, background: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.03)' }}>
-                      <p style={{ fontSize: 12, fontWeight: 'bold' }}>{name}</p>
-                      <p style={{ fontSize: 20, fontWeight: 'bold', color: '#E6007E' }}>{count} <span style={{ fontSize: 10, color: '#999', fontWeight: 'normal' }}>pedidos</span></p>
+                      <p style={{ fontSize: 12, fontWeight: 'bold', margin: 0 }}>{name}</p>
+                      <p style={{ fontSize: 20, fontWeight: 'bold', color: '#E6007E', margin: 0 }}>{count} <span style={{ fontSize: 10, color: '#999', fontWeight: 'normal' }}>pedidos</span></p>
                     </div>
                   ))}
                 </div>
@@ -204,7 +244,7 @@ function App() {
           )}
 
           {activeTab === 'ventas' && (
-            <motion.div key="ventas" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 30 }}>
+            <motion.div key="ventas" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="split-view">
               <div className="glass" style={{ padding: 32, borderRadius: 28, height: 'fit-content' }}>
                 <h4 style={{ marginBottom: 24, fontSize: 18, display:'flex', alignItems:'center', gap:10 }}><PlusCircle color="#E6007E"/> Cargar Venta</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -213,7 +253,7 @@ function App() {
                   <input style={inputStyle} placeholder="Producto" value={vProduct} onChange={e => setVProduct(e.target.value)} />
                   <input style={inputStyle} type="number" placeholder="Total $" value={vTotal} onChange={e => setVTotal(e.target.value)} />
                   <p style={{ fontSize: 10, fontWeight:'bold', color:'#999', marginTop:8 }}>DATOS DE DESPACHO</p>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                  <div className="form-grid" style={{ display:'grid', gridTemplateColumns: '1fr 1fr', gap:10 }}>
                     <input style={inputStyle} placeholder="DNI" value={vDoc} onChange={e => setVDoc(e.target.value)} />
                     <input style={inputStyle} placeholder="Teléfono" value={vPhone} onChange={e => setVPhone(e.target.value)} />
                   </div>
@@ -225,8 +265,8 @@ function App() {
                   <button onClick={handleSaveOrder} style={{ padding: 18, borderRadius: 16, background: '#E6007E', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold', marginTop: 10 }}>Guardar Venta</button>
                 </div>
               </div>
-              <div className="glass" style={{ borderRadius: 28, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="glass table-container" style={{ borderRadius: 28 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
                   <thead style={{ background: 'rgba(0,0,0,0.03)', fontSize: 11, textTransform: 'uppercase', color: '#999' }}>
                     <tr><th style={{ padding: 20, textAlign: 'left' }}>Cliente</th><th style={{ padding: 20 }}>Deuda</th><th style={{ padding: 20, textAlign: 'right' }}>Acciones</th></tr>
                   </thead>
@@ -251,7 +291,7 @@ function App() {
 
           {/* ── HERRERÍA ── */}
           {activeTab === 'herreria' && (
-            <motion.div key="herreria" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 30 }}>
+            <motion.div key="herreria" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="split-view">
               <div className="glass" style={{ padding: 32, borderRadius: 28, height: 'fit-content' }}>
                 <h4 style={{ marginBottom: 24, fontSize: 18, display:'flex', alignItems:'center', gap:10 }}><Hammer color="#f59e0b"/> Pedido Herrero</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -263,8 +303,8 @@ function App() {
                   <button onClick={handleSaveBlacksmithOrder} style={{ padding: 18, borderRadius: 16, background: '#f59e0b', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>Encargar</button>
                 </div>
               </div>
-              <div className="glass" style={{ borderRadius: 28, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="glass table-container" style={{ borderRadius: 28 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
                   <thead style={{ background: 'rgba(0,0,0,0.03)', fontSize: 11, textTransform: 'uppercase', color: '#999' }}>
                     <tr><th style={{ padding: 20, textAlign: 'left' }}>Cliente</th><th style={{ padding: 20 }}>Estructura</th><th style={{ padding: 20, textAlign: 'right' }}>Estado</th></tr>
                   </thead>
@@ -311,15 +351,15 @@ function App() {
       <AnimatePresence>
         {viewingOrder && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }} className="no-print" onClick={() => setViewingOrder(null)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass" style={{ padding: 40, borderRadius: 32, width: 600 }} onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-                <h4 style={{ fontSize: 24, fontFamily: 'Playfair Display' }}>Detalle de Orden</h4>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass glass-modal" style={{ padding: 40, borderRadius: 32, width: 600, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, alignItems: 'center' }}>
+                <h4 style={{ fontSize: 24, fontFamily: 'Playfair Display', margin: 0 }}>Detalle de Orden</h4>
                 <div style={{ display:'flex', gap:10 }}>
-                  <button onClick={() => window.print()} style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', borderRadius:12, background:'#E6007E', color:'white', border:'none', cursor:'pointer', fontWeight:'bold' }}><Printer size={16}/> Imprimir Etiqueta</button>
-                  <button onClick={() => setViewingOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24}/></button>
+                  <button onClick={() => window.print()} className="hide-mobile" style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', borderRadius:12, background:'#E6007E', color:'white', border:'none', cursor:'pointer', fontWeight:'bold' }}><Printer size={16}/> Imprimir</button>
+                  <button onClick={() => setViewingOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 5 }}><X size={24}/></button>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              <div className="modal-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                 <div>
                   <p style={{ fontSize: 11, fontWeight:'bold', color:'#E6007E', marginBottom:10 }}>PEDIDO</p>
                   <p style={{ fontSize: 14 }}><b>Cliente:</b> {viewingOrder.customerName || viewingOrder.customer}</p>
@@ -337,25 +377,28 @@ function App() {
                 <p style={{ fontSize: 10, color: '#999', fontWeight: 'bold' }}>OBSERVACIONES:</p>
                 <p style={{ fontSize: 13 }}>{viewingOrder.observations || 'Sin observaciones'}</p>
               </div>
+              <button onClick={() => window.print()} className="show-mobile" style={{ display:'none', width: '100%', marginTop: 20, alignItems:'center', justifyContent: 'center', gap:8, padding:'15px', borderRadius:12, background:'#E6007E', color:'white', border:'none', cursor:'pointer', fontWeight:'bold' }}><Printer size={16}/> Imprimir Etiqueta</button>
             </motion.div>
           </div>
         )}
         {showHistory && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }} onClick={() => setShowHistory(false)}>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass" style={{ padding: 48, borderRadius: 32, width: 450 }} onClick={e => e.stopPropagation()}>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass glass-modal" style={{ padding: 48, borderRadius: 32, width: 450 }} onClick={e => e.stopPropagation()}>
               <h4 style={{ fontSize: 24, fontFamily: 'Playfair Display', marginBottom: 30 }}>Historial Mensual</h4>
-              {Object.entries(monthlyHistory).map(([month, total]: any) => (
-                <div key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: 20, background: 'white', borderRadius: 20, marginBottom: 10 }}>
-                  <span style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>{month}</span>
-                  <span style={{ fontWeight: 'bold', color: '#E6007E' }}>${total.toLocaleString()}</span>
-                </div>
-              ))}
+              <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: 10 }}>
+                {Object.entries(monthlyHistory).map(([month, total]: any) => (
+                  <div key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: 20, background: 'white', borderRadius: 20, marginBottom: 10 }}>
+                    <span style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>{month}</span>
+                    <span style={{ fontWeight: 'bold', color: '#E6007E' }}>${total.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         )}
         {editingOrder && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-            <div className="glass" style={{ padding: 48, borderRadius: 32, width: 420 }}>
+            <div className="glass glass-modal" style={{ padding: 48, borderRadius: 32, width: 420 }}>
               <h4 style={{ marginBottom: 24, fontSize: 22, fontFamily:'Playfair Display' }}>Actualizar Pago</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <input type="number" style={inputStyle} value={editPayment} onChange={e => setEditPayment(e.target.value)} placeholder="Monto Pagado" />
@@ -365,8 +408,8 @@ function App() {
                      const paid = parseFloat(editPayment) || 0;
                      setOrders(prev => prev.map(o => o.id === editingOrder.id ? { ...o, advancePayment: paid, balance: o.totalAmount - paid, observations: editObs } : o));
                      setEditingOrder(null);
-                  }} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold' }}>Guardar</button>
-                  <button onClick={() => setEditingOrder(null)} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#f5f5f5', border: 'none' }}>Cancelar</button>
+                  }} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#10b981', color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Guardar</button>
+                  <button onClick={() => setEditingOrder(null)} style={{ flex: 1, padding: 16, borderRadius: 14, background: '#f5f5f5', border: 'none', cursor: 'pointer' }}>Cancelar</button>
                 </div>
               </div>
             </div>
